@@ -1,3 +1,4 @@
+import profileImg from './profile.jpg';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Updated sample questions based on your CV
