@@ -3,11 +3,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Updated sample questions based on your CV
 const SAMPLE_QUESTIONS = [
-  'How do you pronounce your name?',
-  'Tell me about your project CrackMe.',
-  'What is your experience with AWS and LangGraph?',
-  "What's your #1 superpower?",
-  'How do you push your boundaries and limits?'
   'What is your total experience and relevant AI experience?',
   'How many years do you have in Python, React, and AWS?',
   'What is your current location and expected CTC?',
