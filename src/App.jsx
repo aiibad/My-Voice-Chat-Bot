@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { askBot } from './lib/api';
 
 const SAMPLE_QUESTIONS = [
   'What should we know about your life story in a few sentences?',
@@ -29,9 +28,7 @@ export default function App() {
 
   /* ---------- setup speech recognition ---------- */
   useEffect(() => {
-    const SR =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SR) {
       setSttSupported(false);
       return;
@@ -93,9 +90,7 @@ export default function App() {
     const voices = synth.getVoices();
     const preferred =
       voices.find((v) =>
-        /Google US English|Samantha|Microsoft Aria|Microsoft Zira/i.test(
-          v.name
-        )
+        /Google US English|Samantha|Microsoft Aria|Microsoft Zira/i.test(v.name)
       ) || voices.find((v) => v.lang === 'en-US');
 
     if (preferred) utt.voice = preferred;
@@ -107,15 +102,47 @@ export default function App() {
     synth.speak(utt);
   }, []);
 
+  /* ---------- UPDATED: Streaming Pipeline ---------- */
   const runPipeline = useCallback(
     async (question) => {
       setStatus('thinking');
       setError('');
       setReply('');
+      
       try {
-        const answer = await askBot(question);
-        setReply(answer);
-        speak(answer);
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ question }),
+        });
+
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || `Request failed (${response.status})`);
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let fullText = '';
+
+        // Read the stream word-by-word
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          const chunk = decoder.decode(value, { stream: true });
+          fullText += chunk;
+          
+          setReply(fullText); // Update the UI immediately
+          setStatus('speaking'); // Show speaking state
+        }
+
+        // Once the stream is done, speak the full text
+        if (fullText.trim()) {
+          speak(fullText.trim());
+        } else {
+          setStatus('idle');
+        }
       } catch (e) {
         setError(e.message || 'Something went wrong');
         setStatus('idle');
@@ -133,15 +160,11 @@ export default function App() {
     setStatus('listening');
     try {
       recognitionRef.current.start();
-    } catch {
-      /* already started — ignore */
-    }
+    } catch {}
   };
 
   const stopAll = () => {
-    try {
-      recognitionRef.current?.stop();
-    } catch {}
+    try { recognitionRef.current?.stop(); } catch {}
     synthRef.current?.cancel();
     setStatus('idle');
   };
@@ -181,7 +204,6 @@ export default function App() {
           Ask anything about me — I’ll answer out loud, in my own voice.
         </p>
 
-        {/* The orb */}
         <button
           type="button"
           className={`orb orb--${status}`}
@@ -194,11 +216,7 @@ export default function App() {
 
         <p className="status">{STATUS_LABEL[status]}</p>
 
-        {error && (
-          <div className="error" role="alert">
-            {error}
-          </div>
-        )}
+        {error && <div className="error" role="alert">{error}</div>}
 
         {!sttSupported && (
           <div className="warn">
@@ -207,7 +225,6 @@ export default function App() {
           </div>
         )}
 
-        {/* Transcript + Reply */}
         {(transcript || reply) && (
           <section className="bubbles">
             {transcript && (
@@ -225,7 +242,6 @@ export default function App() {
           </section>
         )}
 
-        {/* Text fallback */}
         <form className="text-form" onSubmit={askText}>
           <input
             type="text"
@@ -239,7 +255,6 @@ export default function App() {
           </button>
         </form>
 
-        {/* Sample questions */}
         <section className="samples">
           <p className="samples-label">Try one of these:</p>
           <div className="chips">
