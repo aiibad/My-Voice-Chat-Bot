@@ -222,10 +222,10 @@ export default function App() {
           aria-label={status === 'idle' ? 'Start talking' : 'Stop'}
         >
           <span className="orb-glow" />
-          {/* Added the inline background image here */}
+          {/* FIXED: Now using the imported profileImg variable */}
           <span 
             className="orb-core" 
-            style={{ backgroundImage: "url('/profile.jpg')" }}
+            style={{ backgroundImage: `url(${profileImg})` }}
           />
         </button>
 
