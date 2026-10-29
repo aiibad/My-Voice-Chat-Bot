@@ -35,7 +35,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.1-8b-instant', // Ultra-fast model[reference:3]
+        model: 'llama-3.3-70b-versatile', // Ultra-fast model[reference:3]
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: question }
