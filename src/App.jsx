@@ -73,7 +73,7 @@ export default function App() {
     };
   }, []);
 
-  /* ---------- the actual voice loop ---------- */
+    /* ---------- the actual voice loop ---------- */
   const speak = useCallback((text) => {
     const synth = synthRef.current;
     if (!synth) {
@@ -85,15 +85,24 @@ export default function App() {
     const utt = new SpeechSynthesisUtterance(text);
     utt.lang = 'en-US';
     utt.rate = 1;
-    utt.pitch = 1;
+    
+    // Slightly lower the pitch as a fallback to sound more masculine
+    utt.pitch = 0.85;
 
     const voices = synth.getVoices();
-    const preferred =
-      voices.find((v) =>
-        /Google US English|Samantha|Microsoft Aria|Microsoft Zira/i.test(v.name)
-      ) || voices.find((v) => v.lang === 'en-US');
+    
+    // Look specifically for known MALE voice names
+    const maleVoice = voices.find((v) => 
+      /Google UK English Male|Google US English Male|Microsoft Guy|Microsoft David|Microsoft Mark|Alex|Daniel/i.test(v.name)
+    );
 
-    if (preferred) utt.voice = preferred;
+    if (maleVoice) {
+      utt.voice = maleVoice;
+      utt.pitch = 1; // Reset pitch to normal since we found a real male voice
+    } else {
+      // Fallback to any English voice if no male voice is found
+      utt.voice = voices.find((v) => v.lang === 'en-US' || v.lang === 'en-GB');
+    }
 
     utt.onstart = () => setStatus('speaking');
     utt.onend = () => setStatus('idle');
