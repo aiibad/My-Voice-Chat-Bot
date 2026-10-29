@@ -3,11 +3,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 // Updated sample questions based on your CV
 const SAMPLE_QUESTIONS = [
+  'Can you introduce yourself?',
+  'What is your current location and expected CTC?',
   'What is your total experience and relevant AI experience?',
   'How many years do you have in Python, React, and AWS?',
-  'What is your current location and expected CTC?',
   'Confirm your email ID and interview availability.',
-  'Can you introduce yourself?',
 ];
 
 const STATUS_LABEL = {
