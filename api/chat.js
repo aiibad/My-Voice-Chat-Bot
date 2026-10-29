@@ -1,3 +1,5 @@
+export const maxDuration = 30; // Allow up to 30 seconds for streaming
+
 const SYSTEM_PROMPT = `
 You are a voice bot that represents Ibad Rehman. You speak in the FIRST PERSON,
 as if you are Ibad Rehman. Your answers are spoken aloud by a text-to-speech
@@ -20,27 +22,33 @@ export default async function handler(req, res) {
   const { question } = req.body || {};
   if (!question) return res.status(400).json({ error: 'Missing question' });
 
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'Server not configured: missing GEMINI_API_KEY' });
+  // Use the NEW Groq API key you just created
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'Server not configured: missing GROQ_API_KEY' });
 
   try {
-    // Changed to streamGenerateContent for faster response
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:streamGenerateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: question }] }],
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          generationConfig: { temperature: 0.7, maxOutputTokens: 300 },
-        }),
-      }
-    );
+    // Call the Groq API (OpenAI-compatible endpoint)[reference:2]
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant', // Ultra-fast model[reference:3]
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: question }
+        ],
+        temperature: 0.7,
+        max_tokens: 150,
+        stream: true, // Enable streaming for real-time text
+      }),
+    });
 
     if (!response.ok) {
       const errText = await response.text();
-      return res.status(502).json({ error: `Gemini API error: ${errText.slice(0, 300)}` });
+      return res.status(502).json({ error: `Groq API error: ${errText.slice(0, 300)}` });
     }
 
     // Set headers for streaming
@@ -56,15 +64,15 @@ export default async function handler(req, res) {
       if (done) break;
       
       const chunk = decoder.decode(value, { stream: true });
-      // Extract text from the SSE chunk
       const lines = chunk.split('\n');
+      
       for (const line of lines) {
         if (line.startsWith('data: ')) {
           const dataStr = line.slice(6).trim();
           if (dataStr === '[DONE]') continue;
           try {
             const data = JSON.parse(dataStr);
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            const text = data.choices?.[0]?.delta?.content;
             if (text) res.write(text); // Send text immediately
           } catch (e) { /* Ignore incomplete chunks */ }
         }
