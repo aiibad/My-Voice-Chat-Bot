@@ -22,12 +22,12 @@ export default async function handler(req, res) {
   const { question } = req.body || {};
   if (!question) return res.status(400).json({ error: 'Missing question' });
 
-  // Use the NEW Groq API key you just created
+  // Use the NEW Groq API key you created
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'Server not configured: missing GROQ_API_KEY' });
 
   try {
-    // Call the Groq API (OpenAI-compatible endpoint)[reference:2]
+    // Call the Groq API (OpenAI-compatible endpoint)
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -35,7 +35,8 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile', // Ultra-fast model[reference:3]
+        // UPDATED: Using Groq's recommended replacement for the retired Llama models
+        model: 'openai/gpt-oss-120b', 
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: question }
