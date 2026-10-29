@@ -7,7 +7,11 @@ const SAMPLE_QUESTIONS = [
   'What is your current location and expected CTC?',
   'What is your total experience and relevant AI experience?',
   'How many years do you have in Python, React, and AWS?',
+  'How many years in RAG and MCP?',
   'Confirm your email ID and interview availability.',
+  'What is your #1 superpower?',
+  'What misconception do your coworkers have about you?',
+  'How do you push your boundaries and limits?',  
 ];
 
 const STATUS_LABEL = {
