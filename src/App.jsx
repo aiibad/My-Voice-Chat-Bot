@@ -1,15 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Updated sample questions based on your CV
 const SAMPLE_QUESTIONS = [
-  'What should we know about your life story in a few sentences?',
+  'How do you pronounce your name?',
+  'Tell me about your project CrackMe.',
+  'What is your experience with AWS and LangGraph?',
   "What's your #1 superpower?",
-  "What are the top 3 areas you'd like to grow in?",
-  'What misconception do your coworkers have about you?',
   'How do you push your boundaries and limits?',
 ];
 
 const STATUS_LABEL = {
-  idle: 'Tap the orb to start talking',
+  idle: 'Tap my photo to start talking',
   listening: 'Listening…',
   thinking: 'Thinking…',
   speaking: 'Speaking…',
@@ -73,7 +74,7 @@ export default function App() {
     };
   }, []);
 
-    /* ---------- the actual voice loop ---------- */
+  /* ---------- the actual voice loop ---------- */
   const speak = useCallback((text) => {
     const synth = synthRef.current;
     if (!synth) {
@@ -203,14 +204,14 @@ export default function App() {
       <header className="header">
         <div className="brand">
           <span className="brand-dot" />
-          <span>Voice&nbsp;Twin</span>
+          <span>Ibad Rehman</span>
         </div>
       </header>
 
       <main className="main">
-        <h1 className="title">Talk to my AI twin</h1>
+        <h1 className="title">Meet my AI Twin</h1>
         <p className="subtitle">
-          Ask anything about me — I’ll answer out loud, in my own voice.
+          Enterprise AI Architect — ask me anything about my tech stack, projects, or experience.
         </p>
 
         <button
@@ -220,7 +221,11 @@ export default function App() {
           aria-label={status === 'idle' ? 'Start talking' : 'Stop'}
         >
           <span className="orb-glow" />
-          <span className="orb-core" />
+          {/* Added the inline background image here */}
+          <span 
+            className="orb-core" 
+            style={{ backgroundImage: "url('/profile.jpg')" }}
+          />
         </button>
 
         <p className="status">{STATUS_LABEL[status]}</p>
@@ -244,7 +249,7 @@ export default function App() {
             )}
             {reply && (
               <div className="bubble bubble--bot">
-                <span className="bubble-label">Me</span>
+                <span className="bubble-label">Ibad AI</span>
                 <p>{reply}</p>
               </div>
             )}
@@ -282,7 +287,7 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        Built with the Web Speech API + Google Gemini
+        Built with Web Speech API + Groq LPU
       </footer>
     </div>
   );
